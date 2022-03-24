@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://unpkg.com/konva@4.0.15/konva.min.js"></script>
+  <meta charset="utf-8" />
+  <title>Konva Complex Drag and Drop Bounds Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: auto;
+    }
+
+    #container {
+      background-color: gainsboro;
+    }
+
+    #box_stage {
+      overflow: auto;
+      padding: 100px;
+      border: 1px solid darkgray;
+    }
+
+    #box_content {
+      border: 1px solid blueviolet;
+      overflow: auto;
+      width: 100%;
+      height: 500px;
+    }
+
+    #stage {
+      background: gray;
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+    <div id="box_stage">
+        <div id="container"></div>
+    </div>
+  <button onclick="changeScale(true)">+</button>
+  <button onclick="changeScale(false)">-</button>
+  <!-- <div id="container"></div> -->
+
+  <script>
+    var width = 500;
+    var height = 500;
+
+    var containerElement = document.getElementById('container');
+    containerElement.style.width = width+'px';
+
+    var stage = new Konva.Stage({
+      container: 'container',
+      width: width,
+      height: height
+    });
+
+    var layer = new Konva.Layer();
+
+    var blueText = new Konva.Text({
+      fontSize: 26,
+      fontFamily: 'Calibri',
+      text: 'bound below',
+      fill: 'black',
+      padding: 10
+    });
+
+    var blueRect = new Konva.Rect({
+      width: blueText.width(),
+      height: blueText.height(),
+      fill: '#aaf',
+      stroke: 'black',
+    });
+
+    var blueGroup = new Konva.Group({
+      x: 500 - blueText.width(),
+      y: 0,
+      draggable: true,
+      dragBoundFunc: function (pos) {
+        var newY = pos.y < 0 ? 0 : pos.y;
+        var newX = pos.x < 0 ? 0 : pos.x;
+
+        resizeStage(newX);
+
+        return {
+          x: newX,
+          y: newY
+        };
+      }
+    });
+
+    blueGroup.add(blueRect).add(blueText);
+
+    layer.add(blueGroup);
+
+    var redRect = new Konva.Rect({
+      width: blueText.width(),
+      height: blueText.height(),
+      fill: '#aaf',
+      stroke: 'red',
+      draggable: true,
+      dragBoundFunc: function (pos) {
+        var newY = pos.y < 0 ? 0 : pos.y;
+        var newX = pos.x < 0 ? 0 : pos.x;
+
+        resizeStage(newX);
+
+        return {
+          x: newX,
+          y: newY
+        };
+      }
+    });
+    console.log(redRect.size())
+    layer.add(redRect);
+
+    // add the layer to the stage
+    stage.add(layer);
+
+    // =======
+    var scaleBy = 1.01;
+    function changeScale(isZoom) {
+      var oldScale = stage.scaleX();
+      var newScale = isZoom ? oldScale * scaleBy : oldScale / scaleBy;
+      console.log(stage.scaleX());
+      stage.scale({ x: newScale, y: newScale });
+      stage.batchDraw();
+    }
+
+    // 
+    function resizeStage(newX){
+      var offsetSize = newX + blueText.width();
+        var stageSize = stage.size();
+
+        if (stageSize.width < offsetSize) {
+          var newWidth = stageSize.width + width;
+          containerElement.style.width = newWidth+'px';
+
+          stage.size({
+            width: newWidth,
+            height: stageSize.height
+          });
+        }
+
+        // if (offsetSize < (stageSize.width - width)) {
+        //   var newWidth = stageSize.width - width;
+        //   containerElement.style.width = newWidth+'px';
+
+        //   stage.size({
+        //     width: newWidth,
+        //     height: stageSize.height
+        //   });
+        //   console.log(offsetSize, (stageSize.width - width));
+        // }
+    }
+
+  </script>
+</body>
+
+</html>
